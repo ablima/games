@@ -13,13 +13,16 @@ public class CharacterControl : MonoBehaviour {
      	public float minSwipeX;
 	public float jumpForce;
 
-	private Rigidbody2D body;
+	private Rigidbody body;
+	private Animator animator;
 	private Vector2 swipeStart;
 
 	// Use this for initialization
 	void Start () {
-		body = GetComponent<Rigidbody2D>();
+		body = GetComponent<Rigidbody>();
+		animator = GetComponent<Animator>();
 		speed = 0.3f;
+		jumpForce = 300.0f;
 		moveRight = false;
 		moveLeft = false;
 		jump = false;
@@ -37,6 +40,7 @@ public class CharacterControl : MonoBehaviour {
 					moveRight = false;
 					moveLeft = false;
 					Debug.Log("iniciou");
+					animator.SetBool("run", false);
 					break;
 				case TouchPhase.Ended:
 					Debug.Log("finalizou");
@@ -45,8 +49,6 @@ public class CharacterControl : MonoBehaviour {
 						float swipeDirection = Mathf.Sign(t.position.y - swipeStart.y);
 						if(swipeDirection > 0 && !jump){
 							jump = true;
-							var jumpVector = new Vector3(0.0f, 2.0f, 0.0f);
-							body.AddForce(jumpVector * jumpForce, ForceMode.Impulse);
 						}
 					}
 
@@ -58,6 +60,7 @@ public class CharacterControl : MonoBehaviour {
 							moveRight = true;
 						if(swipeDirection < 0)
 							moveLeft = true;
+						animator.SetBool("run", true);
 					}
 					break;
 
@@ -67,9 +70,26 @@ public class CharacterControl : MonoBehaviour {
 		var direction = 0;
 		if(moveRight){
 			direction = 1;
+			animator.SetBool("run", true);
+			var scaleX = transform.localScale.x;
+			if(scaleX < 0){
+				scaleX = -scaleX;
+			}
+			transform.localScale = new Vector3( scaleX, transform.localScale.y, transform.localScale.z );
 		}
 		if(moveLeft){
 			direction = -1;
+			animator.SetBool("run", true);
+			var scaleX = transform.localScale.x;
+                        if(scaleX > 0){
+                                scaleX = -scaleX;
+                        }
+                        transform.localScale = new Vector3( scaleX, transform.localScale.y, transform.localScale.z );
+		}
+		if(jump){
+			body.AddForce(transform.up * jumpForce);
+			jump = false;
+			animator.SetTrigger("jump");
 		}
 
 		var move = new Vector3(direction, 0, 0);
