@@ -13,6 +13,10 @@ public class CharacterControl : MonoBehaviour {
      	public float minSwipeX;
 	public float jumpForce;
 
+	private bool rotate;
+	private float rotationIncrement;
+	private float toRotation;
+
 	private Rigidbody body;
 	private Animator animator;
 	private Vector2 swipeStart;
@@ -21,13 +25,16 @@ public class CharacterControl : MonoBehaviour {
 	void Start () {
 		body = GetComponent<Rigidbody>();
 		animator = GetComponent<Animator>();
-		speed = 0.3f;
+		speed = 0.2f;
 		jumpForce = 300.0f;
+		minSwipeX = 1;
+		minSwipeY = 1;
 		moveRight = false;
 		moveLeft = false;
 		jump = false;
+		rotate = false;
 	}
-	
+
 	// Update is called once per frame
 	void Update () {
 
@@ -49,6 +56,8 @@ public class CharacterControl : MonoBehaviour {
 						float swipeDirection = Mathf.Sign(t.position.y - swipeStart.y);
 						if(swipeDirection > 0 && !jump){
 							jump = true;
+							body.AddForce(transform.up * jumpForce);
+                        				animator.SetTrigger("jump");
 						}
 					}
 
@@ -67,32 +76,144 @@ public class CharacterControl : MonoBehaviour {
 			}
 		}
 
-		var direction = 0;
-		if(moveRight){
-			direction = 1;
-			animator.SetBool("run", true);
-			var scaleX = transform.localScale.x;
-			if(scaleX < 0){
-				scaleX = -scaleX;
+		if ( Input.GetKey(KeyCode.LeftArrow) ){
+			moveRight = false;
+			moveLeft = true;
+		}
+		if ( Input.GetKey(KeyCode.RightArrow) ){
+                        moveRight = true;
+                        moveLeft = false;
+                }	
+		if ( Input.GetKey(KeyCode.DownArrow) ){
+                        moveRight = false;
+                        moveLeft = false;
+			animator.SetBool("run", false);
+                }
+		if ( Input.GetKey(KeyCode.UpArrow) && !jump ){
+                        jump = true;
+			body.AddForce(transform.up * jumpForce);
+                        animator.SetTrigger("jump");
+                }
+		
+		var scaleX = transform.localScale.x;
+		var rotationY = transform.eulerAngles.y;
+		var direction = new Vector3(0,0,0);
+
+		if(rotate){
+                        transform.rotation = Quaternion.Euler(0, rotationY+rotationIncrement, 0);
+			var finished = false;
+			if(rotationIncrement > 0){
+				if(toRotation >= 360){
+					if(transform.eulerAngles.y + rotationIncrement < 10)
+						finished = true;
+				}else{
+					if(transform.eulerAngles.y + rotationIncrement > toRotation)
+						finished = true;
+				}
+			}else{
+				if(transform.eulerAngles.y + rotationIncrement < toRotation)
+					finished = true;
+			}	
+			if(finished){
+				if(toRotation >= 360)
+					toRotation = 0;
+				transform.rotation = Quaternion.Euler(0, toRotation, 0);
+                                rotate = false;
 			}
+                }
+
+		if(moveRight){
+			animator.SetBool("run", true);
+			if(rotationY > -5 && rotationY < 5){
+				direction = new Vector3(1,0,0);
+                        	if(scaleX < 0)
+                                	scaleX = -scaleX;
+			}
+			if(rotationY > 85 && rotationY < 95){
+				direction = new Vector3(0,0,-1);
+                                if(scaleX < 0)
+                                        scaleX = -scaleX;
+			}
+			if(rotationY > 175 && rotationY < 185){
+                                direction = new Vector3(-1,0,0);
+                                if(scaleX < 0)
+                                        scaleX = -scaleX;
+                        }
+			if(rotationY > 265 && rotationY < 275){
+                                direction = new Vector3(0,0,1);
+                                if(scaleX < 0)
+                                        scaleX = -scaleX;
+                        }
 			transform.localScale = new Vector3( scaleX, transform.localScale.y, transform.localScale.z );
 		}
 		if(moveLeft){
-			direction = -1;
 			animator.SetBool("run", true);
-			var scaleX = transform.localScale.x;
-                        if(scaleX > 0){
-                                scaleX = -scaleX;
+			if(rotationY > -5 && rotationY < 5){
+                                direction = new Vector3(-1,0,0);
+                                if(scaleX > 0)
+                                        scaleX = -scaleX;
+                        }
+                        if(rotationY > 85 && rotationY < 95){
+                                direction = new Vector3(0,0,1);
+                                if(scaleX > 0)
+                                        scaleX = -scaleX;
+                        }
+                        if(rotationY > 175 && rotationY < 185){
+                                direction = new Vector3(1,0,0);
+                                if(scaleX > 0)
+                                        scaleX = -scaleX;
+                        }
+                        if(rotationY > 265 && rotationY < 275){
+                                direction = new Vector3(0,0,-1);
+                                if(scaleX > 0)
+                                        scaleX = -scaleX;
                         }
                         transform.localScale = new Vector3( scaleX, transform.localScale.y, transform.localScale.z );
 		}
-		if(jump){
-			body.AddForce(transform.up * jumpForce);
-			jump = false;
-			animator.SetTrigger("jump");
-		}
 
-		var move = new Vector3(direction, 0, 0);
-         	transform.position += move * speed;
+         	transform.position += direction * speed;
 	}
+
+	void OnCollisionEnter(Collision other){
+		var tag = other.gameObject.tag;
+                if(tag=="ground" && jump){
+                        jump = false;
+			moveLeft = false;
+			moveRight = false;
+			animator.SetBool("run", false);
+                }
+        }
+
+	void OnTriggerEnter(Collider other){
+		var tag = other.gameObject.tag;
+		if(tag=="stop"){
+                        moveLeft = false;
+                        moveRight = false;
+                        animator.SetBool("run", false);
+                }
+                if(tag=="rotate"){
+			if(!rotate){
+				var rotationY = transform.eulerAngles.y;
+				if(moveLeft){
+					toRotation = rotationY + 90;
+				}
+				if(moveRight){
+					toRotation = rotationY - 90;
+					if(toRotation < 0){
+						rotationY = 360;
+						toRotation = rotationY + toRotation;
+						transform.rotation = Quaternion.Euler(0, rotationY, 0);
+					}
+				}
+				if(rotationY > toRotation)
+					rotationIncrement = -5f;
+				else
+					rotationIncrement = 5f;
+				rotate = true;
+				Debug.Log(toRotation);
+				Debug.Log(rotationY);
+			}
+                }
+	}
+
 }
