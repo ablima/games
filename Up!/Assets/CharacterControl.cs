@@ -4,6 +4,8 @@ using UnityEngine;
 
 public class CharacterControl : MonoBehaviour {
 
+	public GameObject respawnPoint;
+
 	public float speed;
 	public bool moveRight;
 	public bool moveLeft;
@@ -25,8 +27,8 @@ public class CharacterControl : MonoBehaviour {
 	void Start () {
 		body = GetComponent<Rigidbody>();
 		animator = GetComponent<Animator>();
-		speed = 0.2f;
-		jumpForce = 300.0f;
+		speed = 0.3f;
+		jumpForce = 500.0f;
 		minSwipeX = 1;
 		minSwipeY = 1;
 		moveRight = false;
@@ -175,13 +177,20 @@ public class CharacterControl : MonoBehaviour {
 	}
 
 	void OnCollisionEnter(Collision other){
+		Debug.Log("colidiu");
 		var tag = other.gameObject.tag;
                 if(tag=="ground" && jump){
                         jump = false;
+			animator.SetBool("run", false);
+                }
+		if(tag=="wall"){
 			moveLeft = false;
 			moveRight = false;
 			animator.SetBool("run", false);
-                }
+		}
+		if(tag=="killer"){
+			die();
+		}
         }
 
 	void OnTriggerEnter(Collider other){
@@ -214,6 +223,19 @@ public class CharacterControl : MonoBehaviour {
 				Debug.Log(rotationY);
 			}
                 }
+		if(tag=="killer"){
+			die();
+                }
+	}
+
+	void die(){
+		moveLeft = false;
+                moveRight = false;
+                jump = false;
+                animator.SetBool("run", false);
+                transform.position = respawnPoint.transform.position;
+                transform.rotation = respawnPoint.transform.rotation;
+                body.velocity = new Vector3(0,0,0);
 	}
 
 }
