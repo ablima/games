@@ -10,4 +10,10 @@ public class ButtonController : MonoBehaviour {
 
     }
 
+    public void exit(){
+
+        Application.Quit();
+
+    }
+
 }

@@ -8,6 +8,7 @@ public class EndPointController : MonoBehaviour {
 	public PointController flag1;
 	public PointController flag2;
 	public PointController flag3;
+	public string level;
 
 	private bool activated;
 
@@ -32,7 +33,7 @@ public class EndPointController : MonoBehaviour {
 
 		if(other.gameObject.tag == "Player" && activated){
 			PoolManager.Instance.desactivateAll();
-			Application.LoadLevel("Menu");
+			Application.LoadLevel(level);
 		}
 
 	}
