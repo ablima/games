@@ -1,0 +1,11 @@
+Bem-vindo ao UP!
+
+Objetivo:
+
+- Encontre as 3 chaves na fase (azul, vermelha e verde) para ativar o ponto de saída e ir para próxima fase.
+
+Como jogar:
+
+- Andar: Deslize para esquerda ou direita.
+- Pular: Deslize para cima
+- Parar: Dê um toque na tela.

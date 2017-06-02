@@ -2,6 +2,10 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+/************************************************
+Controller para os mísseis
+*************************************************/
+
 public class MissileController : MonoBehaviour {
 
 	private Rigidbody body;
@@ -16,6 +20,8 @@ public class MissileController : MonoBehaviour {
 				
 	}
 
+	//Caso o míssel entre em colisão com algum objeto, desativa o míssel para poder
+	//ser instanciado pelo PoolManager
 	void OnCollisionEnter(Collision other){
 
 		body.velocity = new Vector3(0,0,0);
