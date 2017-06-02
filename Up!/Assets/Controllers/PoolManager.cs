@@ -49,4 +49,11 @@ public class PoolManager {
 
     }
 
+    public void desactivateAll(){
+
+        foreach(KeyValuePair<string, ObjectPool> obj in objectPools)
+            obj.Value.desactivateAll();
+
+    }
+
 }

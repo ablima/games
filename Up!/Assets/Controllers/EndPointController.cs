@@ -30,8 +30,10 @@ public class EndPointController : MonoBehaviour {
 
 	void OnTriggerEnter(Collider other){
 
-		if(other.gameObject.tag == "Player" && activated)
+		if(other.gameObject.tag == "Player" && activated){
+			PoolManager.Instance.desactivateAll();
 			Application.LoadLevel("Menu");
+		}
 
 	}
 

@@ -53,4 +53,12 @@ public class ObjectPool {
 
     }
 
+    public void desactivateAll(){
+
+        for (int i = 0; i < pool.Count; i++){
+            pool[i].SetActive(false);
+        }
+
+    }
+
 }
